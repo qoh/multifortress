@@ -56,15 +56,6 @@ Game.prototype.update = function () {
 	}
 
 	setTimeout(this.update.bind(this), 1000 / 30);
-}
-
-Game.prototype.createEntity = function (type, data) {
-	this.entities[this.nextEntity++] = {type: type, data: data};
-	return this.nextEntity - 1;
 };
-
-Game.prototype.destroyEntity = function (entity) {
-	delete this.entities[entity];
-}
 
 module.exports = Game;

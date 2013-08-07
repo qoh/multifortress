@@ -29,6 +29,8 @@ var engine;
 var game;
 
 var PLAYER = new ut.Tile('@', 255, 255, 255);
+var GOBLIN = new ut.Tile('g', 0, 255, 0);
+
 var WALL = new ut.Tile('#', 100, 100, 100);
 var FLOOR = new ut.Tile('.', 50, 50, 50);
 
@@ -56,9 +58,10 @@ var PhysicalEntity = Entity.extend({
 })
 
 var Player = PhysicalEntity.extend({tile: PLAYER});
+var Goblin = PhysicalEntity.extend({tile: GOBLIN});
 
 var entityTypes = [
-	Player
+	Player, Goblin
 ];
 
 function getWorldTile(x, y) {
@@ -156,12 +159,26 @@ function init() {
 	viewport = new ut.Viewport(document.getElementById('game'), 120, 40);
 	engine = new ut.Engine(viewport, getWorldTile, game.world.w, game.world.h);
 
+	function translateKey(key) {
+		if (key == ut.KEY_LEFT)  return 'left';
+		if (key == ut.KEY_RIGHT) return 'right';
+		if (key == ut.KEY_UP)    return 'up';
+		if (key == ut.KEY_DOWN)  return 'down';
+	}
+
+	ut.initInput(
+		function (key) { socket.emit('keydown', translateKey(key)); },
+		function (key) { socket.emit('keyup', translateKey(key)); }
+	);
+
 	update();
 	requestAnimationFrame(render);
 }
 
+var socket;
+
 $(document).ready(function() {
-	var socket = io.connect();
+	socket = io.connect();
 	$('#status').text('Connecting');
 
 	socket.on('connect', function (data) {
@@ -185,6 +202,7 @@ $(document).ready(function() {
 			}
 
 			var value = entities[id];
+			console.log('ent_new ' + JSON.stringify(value));
 
 			if (entityTypes[value.type]) {
 				game.entities[id] = new entityTypes[value.type](value.data);

@@ -1,9 +1,12 @@
 var express = require('express');
 var config = require('./config');
 
+// User modules
 var Game = require('./game');
 var Client = require('./client');
+entity = require('./entity');
 
+// System-wide objects
 var app = express();
 var game = new Game();
 
