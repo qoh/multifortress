@@ -1,0 +1,30 @@
+@charset "utf-8";
+
+body {
+	color: #eee;
+	background-color: #151520;
+	text-align: center;
+	font-family: "DejaVuSansMono", "DejaVu Sans Mono", monospace;
+}
+
+a {
+	color: #44a;
+}
+
+a:hover {
+	text-decoration: none;
+}
+
+#game {
+	font-size: 16px;
+	background-color: #000;
+}
+
+#status {
+	margin: 0.25em;
+	font-size: 1.5em;
+}
+
+.centerer {
+	text-align: center;
+}
