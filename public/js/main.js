@@ -202,7 +202,6 @@ $(document).ready(function() {
 			}
 
 			var value = entities[id];
-			console.log('ent_new ' + JSON.stringify(value));
 
 			if (entityTypes[value.type]) {
 				game.entities[id] = new entityTypes[value.type](value.data);
