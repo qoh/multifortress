@@ -54,9 +54,26 @@ all.PhysicalEntity = all.Entity.extend({
 
 		return false;
 	}
-})
+});
 
-all.Player = all.PhysicalEntity.extend();
+all.Light = all.PhysicalEntity.extend({});
+
+all.Player = all.PhysicalEntity.extend({
+	init: function (game, data) {
+		this._super(game, data);
+
+		this.light = new all.Light(game, {
+			track: this._id,
+			radius: 6,
+			strength: 0.75
+		});
+	},
+	delete: function () {
+		this.light.delete();
+		this._super();
+	}
+});
+
 all.Goblin = all.PhysicalEntity.extend({
 	init: function (game, data) {
 		this._super(game, data);
@@ -80,6 +97,7 @@ all.Goblin = all.PhysicalEntity.extend({
 });
 
 all.entityTypes = [
+	all.Light,
 	all.Player,
 	all.Goblin
 ];

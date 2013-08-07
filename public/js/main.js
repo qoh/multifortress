@@ -35,33 +35,61 @@ var WALL = new ut.Tile('#', 100, 100, 100);
 var FLOOR = new ut.Tile('.', 50, 50, 50);
 
 var Entity = Class.extend({
-	init: function (data) {},
-	patch: function (data) {},
+	init: function (data) { this.data = data; },
+	patch: function (data) { this.data = $.extend(this.data, data); },
 	update: function () {},
 	render: function () {}
 });
 
 var PhysicalEntity = Entity.extend({
 	tile: ut.NULLTILE,
-
-	init: function (data) {
-		this.x = data.x;
-		this.y = data.y;
-	},
-	patch: function (data) {
-		this.x = data.x || this.x;
-		this.y = data.y || this.y;
-	},
-	render: function (data) {
-		putTile(this.tile, this.x, this.y);
+	render: function () {
+		putTile(this.tile, this.data.x, this.data.y);
 	}
 })
+
+var Light = PhysicalEntity.extend({
+	isLight: true,
+	getPosition: function () {
+		if (this.data.track) {
+			var track = game.entities[this.data.track];
+
+			if (track) {
+				return {x: track.data.x, y: track.data.y};
+			}
+
+			return {x: 0, y: 0};
+		}
+
+		return {x: this.data.x, y: this.data.y};
+	},
+	apply: function (out, x, y) {
+		var pos = this.getPosition();
+		var dist = distance(pos.x, pos.y, x, y);
+
+		if (dist >= this.data.radius) {
+			return out;
+		}
+
+		var factor = (1.0 - (dist / this.data.radius)) * this.data.strength;
+		out.factor += factor;
+
+		if (this.data.color) {
+			out.r = Math.round(blend(this.data.color[0], out.r, factor));
+			out.g = Math.round(blend(this.data.color[1], out.g, factor));
+			out.b = Math.round(blend(this.data.color[2], out.b, factor));
+		}
+
+		return out;
+	},
+	render: function () {}
+});
 
 var Player = PhysicalEntity.extend({tile: PLAYER});
 var Goblin = PhysicalEntity.extend({tile: GOBLIN});
 
 var entityTypes = [
-	Player, Goblin
+	Light, Player, Goblin
 ];
 
 function getWorldTile(x, y) {
@@ -108,6 +136,35 @@ function putTile(tile, x, y) {
 	viewport.put(tile, x, y);
 }
 
+function distance(x1, y1, x2, y2) {
+	return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+}
+
+function blend(a, b, f) {
+	return a*f + b*(1.0-f);
+}
+
+function doLighting(tile, x, y, time) {
+	var shaded = new ut.Tile(tile.getChar());
+	var out = {r: tile.r, g: tile.g, b: tile.b, factor: 0.15};
+
+	for (var id in game.entities) {
+		var entity = game.entities[id];
+
+		if (entity.isLight) {
+			out = entity.apply(out, x, y);
+		}
+	}
+
+	out.factor = Math.min(1, Math.max(0, out.factor));
+
+	shaded.r = Math.min(255, Math.max(0, out.r * out.factor));
+	shaded.g = Math.min(255, Math.max(0, out.g * out.factor));
+	shaded.b = Math.min(255, Math.max(0, out.b * out.factor));
+
+	return shaded;
+}
+
 function update() {
 	for (var id in game.entities) {
 		if (game.entities[id].update) {
@@ -118,8 +175,8 @@ function update() {
 	var entity = game.entities[game.control];
 
 	if (entity) {
-		game.camera[0] = entity.x;
-		game.camera[1] = entity.y;
+		game.camera[0] = entity.data.x;
+		game.camera[1] = entity.data.y;
 	}
 
 	setTimeout(update, 1000 / 30);
@@ -170,6 +227,8 @@ function init() {
 		function (key) { socket.emit('keydown', translateKey(key)); },
 		function (key) { socket.emit('keyup', translateKey(key)); }
 	);
+
+	engine.setShaderFunc(doLighting);
 
 	update();
 	requestAnimationFrame(render);
