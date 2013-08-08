@@ -63,7 +63,7 @@ all.Player = all.PhysicalEntity.extend({
 		this._super(game, data);
 
 		this.light = new all.Light(game, {
-			track: this._id,
+			track: this.id,
 			radius: 6,
 			strength: 0.75
 		});

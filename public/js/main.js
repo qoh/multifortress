@@ -146,7 +146,7 @@ function blend(a, b, f) {
 
 function doLighting(tile, x, y, time) {
 	var shaded = new ut.Tile(tile.getChar());
-	var out = {r: tile.r, g: tile.g, b: tile.b, factor: 0.15};
+	var out = {r: tile.r, g: tile.g, b: tile.b, factor: 0.01};
 
 	for (var id in game.entities) {
 		var entity = game.entities[id];
@@ -195,7 +195,7 @@ function render() {
 	viewport.putString(ids.length + " entities", 0, 0);
 
 	for (var i = 0; i < ids.length; ++i) {
-		viewport.putString("&" + ids[i] + " : " + game.entities[ids[i]], 0, i + 1);
+		viewport.putString("&" + ids[i] + " : " + JSON.stringify(game.entities[ids[i]].data), 0, i + 1);
 	}
 
 	viewport.render();
