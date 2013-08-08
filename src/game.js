@@ -53,6 +53,12 @@ function Game() {
 	this.update();
 }
 
+Game.prototype.message = function (message) {
+	for (var i = 0; i < this.clients.length; ++i) {
+			this.clients[i].message(message);
+		}
+}
+
 Game.prototype.update = function () {
 	for (var i = 0; i < this.clients.length; ++i) {
 		this.clients[i].update();

