@@ -127,10 +127,6 @@ all.Player = all.PhysicalEntity.extend({
 				this.client.onDeath();
 			}
 
-			if (this.client.player == this) {
-				this.client.player = null;
-			}
-
 			this.delete();
 		}
 	},
@@ -138,6 +134,10 @@ all.Player = all.PhysicalEntity.extend({
 		this.setHP(this.data.hp + hp);
 	},
 	delete: function () {
+		if (this.client.player == this) {
+			this.client.player = null;
+		}
+
 		this.light.delete();
 		this._super();
 	}

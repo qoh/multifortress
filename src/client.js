@@ -35,7 +35,6 @@ Client.prototype.onDeath = function () {
 Client.prototype.onDisconnect = function () {
 	if (this.player) {
 		this.player.delete();
-		this.player = null;
 	}
 };
 
