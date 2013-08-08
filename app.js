@@ -15,6 +15,8 @@ var game = new Game();
 var server = require('http').createServer(app);
 var io = require('socket.io').listen(server);
 
+game.io = io;
+
 // Object configs
 server.listen(process.env.PORT || 80);
 app.use(express.static(__dirname + '/public'));
@@ -32,6 +34,5 @@ app.get('/', function (req, res) {
 
 // Handle socket.io
 io.sockets.on('connection', function (socket) {
-	socket.emit('world', game.world);
-	game.clients.push(new Client(game, socket, io));
+	var client = new Client(game, socket);
 });

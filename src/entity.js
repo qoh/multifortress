@@ -124,7 +124,7 @@ all.Player = all.PhysicalEntity.extend({
 
 		if (this.data.hp <= 0) {
 			if (this.client) {
-				this.client.onDeath();
+				this.client.ondeath();
 			}
 
 			this.delete();
