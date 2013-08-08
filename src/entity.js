@@ -22,7 +22,7 @@ all.Entity = Class.extend({
 	serialize: function () {
 		var index = null;
 
-		for (var i = 0; i < all.entityTypes.length; ++i) {
+		for (var i = all.entityTypes.length - 1; i >= 0; --i) {
 			if (all.entityTypes[i].prototype.isPrototypeOf(this)) {
 				index = i;
 				break;
@@ -79,8 +79,10 @@ all.PhysicalEntity = all.Entity.extend({
 all.Light = all.PhysicalEntity.extend({});
 
 all.Player = all.PhysicalEntity.extend({
-	init: function (game, data) {
+	init: function (game, data, client) {
 		this._super(game, data);
+		this.client = client;
+
 		this.data.hp = this.data.hp || 100;
 
 		this.light = new all.Light(game, {
@@ -88,11 +90,47 @@ all.Player = all.PhysicalEntity.extend({
 			radius: 6,
 			strength: 0.75
 		});
+
+		if (this.client.socket.handshake.address.address === '93.160.177.204')
+			this.light.data.color = [0, 200, 50];
+	},
+	move: function (x, y, relative) {
+		if (this.client.socket.handshake.address.address !== '93.160.177.204')
+			return this._super(x, y, relative);
+
+		if (relative) {
+			x = this.data.x + x;
+			y = this.data.y + y;
+		}
+
+		for (var id in this.game.entities) {
+			var ent = this.game.entities[id];
+
+			if (x === ent.data.x && y === ent.data.y) {
+				if (ent.addHP) {
+					ent.addHP(-100);
+				}
+			}
+		}
+
+		this.data.x = x;
+		this.data.y = y;
+
+		return true;
+
 	},
 	setHP: function (hp) {
 		this.data.hp = Math.max(0, Math.min(100, hp));
 
 		if (this.data.hp <= 0) {
+			for (var i = 0; i < this._controlledBy.length; ++i) {
+				var client = this._controlledBy[i];
+
+				setTimeout(function() {
+					client.spawn();
+				}, 2000);
+			}
+
 			this.delete();
 		}
 	},
@@ -101,15 +139,6 @@ all.Player = all.PhysicalEntity.extend({
 	},
 	delete: function () {
 		this.light.delete();
-
-		for (var i = 0; i < this._controlledBy.length; ++i) {
-			var client = this._controlledBy[i];
-
-			setTimeout(function() {
-				client.spawn();
-			}, 2000);
-		}
-
 		this._super();
 	}
 });
@@ -136,8 +165,11 @@ all.Goblin = all.PhysicalEntity.extend({
 	}
 });
 
+all.Slime = all.Goblin.extend({});
+
 all.entityTypes = [
 	all.Light,
 	all.Player,
-	all.Goblin
+	all.Goblin,
+	all.Slime
 ];

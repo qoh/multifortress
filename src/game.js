@@ -48,6 +48,8 @@ function Game() {
 	};
 
 	new entity.Goblin(this, {x: 3, y: 2});
+	new entity.Slime(this, {x: 14, y: 13});
+
 	this.update();
 }
 

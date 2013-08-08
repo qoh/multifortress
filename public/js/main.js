@@ -31,6 +31,9 @@ var game;
 var PLAYER = new ut.Tile('\u2659', 255, 255, 255);
 var GOBLIN = new ut.Tile('\u046A', 0, 255, 0);
 
+var SLIME1 = new ut.Tile('࿀', 0, 255, 50);
+var SLIME2 = new ut.Tile('࿁', 0, 255, 50);
+
 var WALL = new ut.Tile('█', 100, 100, 100);
 var FLOOR = new ut.Tile('░', 50, 50, 50);
 var GRASS = new ut.Tile('෴', 0, 200, 0);
@@ -42,14 +45,7 @@ var Entity = Class.extend({
 	render: function () {}
 });
 
-var PhysicalEntity = Entity.extend({
-	tile: ut.NULLTILE,
-	render: function () {
-		putTile(this.tile, this.data.x, this.data.y);
-	}
-})
-
-var Light = PhysicalEntity.extend({
+var Light = Entity.extend({
 	isLight: true,
 	getPosition: function () {
 		if (this.data.track) {
@@ -86,11 +82,40 @@ var Light = PhysicalEntity.extend({
 	render: function () {}
 });
 
-var Player = PhysicalEntity.extend({tile: PLAYER});
-var Goblin = PhysicalEntity.extend({tile: GOBLIN});
+var Actor = Entity.extend({
+	tiles: [ut.NULLTILE],
+	speed: null,
+
+	init: function (data) {
+		this._super(data);
+		this.frame = 0;
+
+		if (this.speed) {
+			this.lastFrame = new Date();
+		}
+	},
+	update: function () {
+		if (this.speed) {
+			var now = new Date();
+
+			if (now - this.lastFrame >= this.speed) {
+				this.frame = (this.frame + 1) % this.tiles.length;
+				this.lastFrame = now;
+			}
+		}
+	},
+	render: function () {
+		putTile(this.tiles[this.frame], this.data.x, this.data.y);
+	}
+});
+
+var Player = Actor.extend({tiles: [PLAYER]});
+var Goblin = Actor.extend({tiles: [GOBLIN]});
+
+var Slime = Actor.extend({tiles: [SLIME1, SLIME2], speed: 600});
 
 var entityTypes = [
-	Light, Player, Goblin
+	Light, Player, Goblin, Slime
 ];
 
 function getWorldTile(x, y) {
@@ -114,7 +139,8 @@ function resetGame() {
 		entities: {},
 		controlling: null,
 
-		camera: [0, 0]
+		camera: [0, 0],
+		messages: []
 	};
 
 	$('#status').css('opacity', 1);
@@ -174,6 +200,10 @@ function update() {
 		}
 	}
 
+	setTimeout(update, 1000 / 30);
+}
+
+function render() {
 	var entity = game.entities[game.control];
 
 	if (entity) {
@@ -181,10 +211,6 @@ function update() {
 		game.camera[1] = entity.data.y;
 	}
 
-	setTimeout(update, 1000 / 30);
-}
-
-function render() {
 	engine.update(game.camera[0], game.camera[1]);
 
 	for (var id in game.entities) {
@@ -209,6 +235,11 @@ function render() {
 		viewport.putString("☠", viewport.cx, viewport.cy, 255, 0, 0);
 	}
 
+	for (var i = 0; i < game.messages.length; ++i) {
+		var message = game.messages[i];
+		viewport.putString(message, viewport.w - message.length, viewport.h - i - 1);
+	}
+
 	viewport.render();
 	requestAnimationFrame(render);
 }
@@ -227,16 +258,9 @@ function init() {
 	viewport = new ut.Viewport(document.getElementById('game'), 120, 40);
 	engine = new ut.Engine(viewport, getWorldTile, game.world.w, game.world.h);
 
-	function translateKey(key) {
-		if (key == ut.KEY_LEFT)  return 'left';
-		if (key == ut.KEY_RIGHT) return 'right';
-		if (key == ut.KEY_UP)    return 'up';
-		if (key == ut.KEY_DOWN)  return 'down';
-	}
-
 	ut.initInput(
-		function (key) { socket.emit('keydown', translateKey(key)); },
-		function (key) { socket.emit('keyup', translateKey(key)); }
+		function (key) { socket.emit('keydown', key); },
+		function (key) { socket.emit('keyup', key); }
 	);
 
 	engine.setShaderFunc(doLighting);
@@ -264,6 +288,14 @@ $(document).ready(function() {
 		game.world = world;
 		init();
 	});
+
+	socket.on('message', function (message) {
+		game.messages.unshift(message);
+
+		if (game.messages.length > 6) {
+			game.messages.splice(6, game.messages.length);
+		}
+	})
 
 	socket.on('ent_new', function (entities) {
 		for (var id in entities) {

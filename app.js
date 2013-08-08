@@ -4,7 +4,9 @@ var config = require('./config');
 // User modules
 var Game = require('./src/game');
 var Client = require('./src/client');
+
 entity = require('./src/entity');
+keys = require('./src/keys');
 
 // System-wide objects
 var app = express();
