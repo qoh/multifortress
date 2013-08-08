@@ -35,6 +35,12 @@ all.Entity = Class.extend({
 });
 
 all.PhysicalEntity = all.Entity.extend({
+	init: function (game, data) {
+		this._super(game, data);
+
+		this.data.x = this.data.x || 0;
+		this.data.y = this.data.y || 0;
+	},
 	move: function (x, y, relative) {
 		if (relative) {
 			x = this.data.x + x;
@@ -45,7 +51,21 @@ all.PhysicalEntity = all.Entity.extend({
 			return false;
 		}
 
-		if (this.game.world.get(x, y) === '.') {
+		for (var id in this.game.entities) {
+			var ent = this.game.entities[id];
+
+			if (x === ent.data.x && y === ent.data.y) {
+				if (ent.addHP) {
+					ent.addHP(-50);
+				}
+
+				return false;
+			}
+		}
+
+		var tile = this.game.world.get(x, y);
+
+		if (tile === '.' || tile == 'G') {
 			this.data.x = x;
 			this.data.y = y;
 
@@ -61,6 +81,7 @@ all.Light = all.PhysicalEntity.extend({});
 all.Player = all.PhysicalEntity.extend({
 	init: function (game, data) {
 		this._super(game, data);
+		this.data.hp = this.data.hp || 100;
 
 		this.light = new all.Light(game, {
 			track: this.id,
@@ -68,8 +89,27 @@ all.Player = all.PhysicalEntity.extend({
 			strength: 0.75
 		});
 	},
+	setHP: function (hp) {
+		this.data.hp = Math.max(0, Math.min(100, hp));
+
+		if (this.data.hp <= 0) {
+			this.delete();
+		}
+	},
+	addHP: function (hp) {
+		this.setHP(this.data.hp + hp);
+	},
 	delete: function () {
 		this.light.delete();
+
+		for (var i = 0; i < this._controlledBy.length; ++i) {
+			var client = this._controlledBy[i];
+
+			setTimeout(function() {
+				client.spawn();
+			}, 2000);
+		}
+
 		this._super();
 	}
 });

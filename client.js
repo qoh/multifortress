@@ -17,6 +17,8 @@ Client.prototype.spawn = function () {
 	this.moveDir = {x: 0, y: 0};
 
 	this.player = new entity.Player(this.game, {x: spawn[0], y: spawn[1]});
+	this.player.client = this;
+
 	this.controlEntity(this.player);
 };
 
@@ -56,10 +58,12 @@ Client.prototype.bindEvents = function () {
 		if (key == 'up')    dir.y -= 1;
 		if (key == 'down')  dir.y += 1;
 
-		nx = other.control.data.x + dir.x;
-		ny = other.control.data.y + dir.y;
+		if (other.control) {
+			nx = other.control.data.x + dir.x;
+			ny = other.control.data.y + dir.y;
 
-		other.control.move(nx, ny);
+			other.control.move(nx, ny);
+		}
 	});
 
 	this.socket.on('keyup', function (key) {

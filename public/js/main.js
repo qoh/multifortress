@@ -28,11 +28,12 @@ var viewpoint;
 var engine;
 var game;
 
-var PLAYER = new ut.Tile('@', 255, 255, 255);
-var GOBLIN = new ut.Tile('g', 0, 255, 0);
+var PLAYER = new ut.Tile('\u2659', 255, 255, 255);
+var GOBLIN = new ut.Tile('\u046A', 0, 255, 0);
 
-var WALL = new ut.Tile('#', 100, 100, 100);
-var FLOOR = new ut.Tile('.', 50, 50, 50);
+var WALL = new ut.Tile('█', 100, 100, 100);
+var FLOOR = new ut.Tile('·', 50, 50, 50);
+var GRASS = new ut.Tile('෴', 0, 200, 0);
 
 var Entity = Class.extend({
 	init: function (data) { this.data = data; },
@@ -100,6 +101,7 @@ function getWorldTile(x, y) {
 
 	if (data === '#') return WALL;
 	if (data === '.') return FLOOR;
+	if (data === 'G') return GRASS;
 
 	return ut.NULLTILE;
 }
@@ -195,7 +197,16 @@ function render() {
 	viewport.putString(ids.length + " entities", 0, 0);
 
 	for (var i = 0; i < ids.length; ++i) {
-		viewport.putString("&" + ids[i] + " : " + JSON.stringify(game.entities[ids[i]].data), 0, i + 1);
+		// viewport.putString("&" + ids[i] + " : " + JSON.stringify(game.entities[ids[i]].data), 0, i + 1);
+	}
+
+	var entity = game.entities[game.control];
+
+	if (entity) {
+		viewport.putString("HP: " + entity.data.hp, 0, viewport.h - 1);
+	}
+	else {
+		viewport.putString("☠", viewport.cx, viewport.cy, 255, 0, 0);
 	}
 
 	viewport.render();
