@@ -41,6 +41,7 @@ function Game() {
 		w: map[0].length,
 		h: map.length,
 		data: map,
+		light: 0.02,
 
 		get: function (x, y) {
 			return this.data[y][x];

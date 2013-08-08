@@ -56,7 +56,7 @@ all.PhysicalEntity = all.Entity.extend({
 
 			if (x === ent.data.x && y === ent.data.y) {
 				if (ent.addHP) {
-					ent.addHP(-50);
+					ent.addHP(Math.floor(Math.random() * 10 + 10) * -1);
 				}
 
 				return false;
@@ -78,10 +78,33 @@ all.PhysicalEntity = all.Entity.extend({
 
 all.Light = all.PhysicalEntity.extend({});
 
+all.Projectile = all.PhysicalEntity.extend({
+	speed: 0,
+	init: function (game, data) {
+		this._super(game, data);
+		this.lastMove = new Date();
+	},
+	update: function () {
+		var now = new Date();
+
+		//if (now - this.lastMove >= this.speed) {
+			this.lastMove = now;
+
+			var dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+			var dir = dirs[this.data.direction];
+
+			if (!this.move(dir[0], dir[1], true)) {
+				this.delete();
+			}
+		//}
+	}
+});
+
 all.Player = all.PhysicalEntity.extend({
 	init: function (game, data, client) {
 		this._super(game, data);
 		this.client = client;
+		this.data.name = client.name;
 
 		this.data.hp = this.data.hp || 100;
 
@@ -90,9 +113,6 @@ all.Player = all.PhysicalEntity.extend({
 			radius: 6,
 			strength: 0.75
 		});
-
-		if (this.client.socket.handshake.address.address === '93.160.177.204')
-			this.light.data.color = [0, 200, 50];
 	},
 	setHP: function (hp) {
 		this.data.hp = Math.max(0, Math.min(100, hp));
@@ -142,9 +162,29 @@ all.Goblin = all.PhysicalEntity.extend({
 
 all.Slime = all.Goblin.extend({});
 
+all.Fire = all.Projectile.extend({
+	speed: 250,
+	init: function (game, data) {
+		this._super(game, data);
+
+		this.light = new all.Light(game, {
+			track: this.id,
+			radius: 4,
+			strength: 0.35,
+			color: [255, 100, 0]
+		});
+	},
+	delete: function () {
+		this.light.delete();
+		this.light = null;
+		this._super();
+	}
+});
+
 all.entityTypes = [
 	all.Light,
 	all.Player,
 	all.Goblin,
-	all.Slime
+	all.Slime,
+	all.Fire
 ];

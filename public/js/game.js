@@ -17,7 +17,8 @@ var Game = Class.extend({
 
 		this.connectState = 0;
 
-		this.viewport = new ut.Viewport(element, 120, 40);
+		// this.viewport = new ut.Viewport(element, 120, 40);
+		this.viewport = new ut.Viewport(element, 100, 35);
 		this.engine = new ut.Engine(this.viewport,
 			this.translateWorldTile.bind(this),
 			0, 0
@@ -133,13 +134,14 @@ var Game = Class.extend({
 	},
 	shadeTile: function (tile, x, y, time) {
 		var shaded = new ut.Tile(tile.getChar());
-		var out = {r: tile.r, g: tile.g, b: tile.b, factor: 0.01};
+		//var out = {r: tile.r, g: tile.g, b: tile.b, factor: 0.01};
+		var out = {r: tile.r, g: tile.g, b: tile.b, factor: this.world.light};
 
 		for (var id in this.entities) {
 			var entity = this.entities[id];
 
 			if (entity.isLight) {
-				out = entity.apply(out, x, y);
+				out = entity.apply(out, x, y, time);
 			}
 		}
 
@@ -153,6 +155,11 @@ var Game = Class.extend({
 	},
 	keydown: function (key) {
 		this.socket.emit('keydown', key);
+
+		if (key == ut.KEY_T) {
+			this.socket.emit('chat', prompt('laziest chat system ever'));
+			return 1;
+		}
 	},
 	keyup: function (key) {
 	},

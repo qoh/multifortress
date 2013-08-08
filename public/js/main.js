@@ -28,6 +28,7 @@ var socket = io.connect();
 var game = new Game(document.getElementById('game'), socket);
 
 socket.on('connect', function (data) {
+	socket.emit('name', prompt('whats your name'));
 	game.connectState = 2;
 });
 

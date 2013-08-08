@@ -20,7 +20,11 @@ var Light = Entity.extend({
 
 		return {x: this.data.x, y: this.data.y};
 	},
-	apply: function (out, x, y) {
+	apply: function (out, x, y, time) {
+		if (this.data.rainbows) {
+			var rgb = hsv2rgb((Math.sin(time / 750) + 1) / 2);
+			this.data.color = [rgb.red, rgb.green, rgb.blue];
+		}
 		var pos = this.getPosition();
 		var dist = distance(pos.x, pos.y, x, y);
 
@@ -40,6 +44,14 @@ var Light = Entity.extend({
 		return out;
 	},
 	render: function () {}
+});
+
+var Projectile = Entity.extend({
+	tiles: [ut.NULLTILE] * 4,
+	render: function (viewport, putTile) {
+		if (this.tiles[this.data.direction] !== undefined)
+		putTile(this.tiles[this.data.direction], this.data.x, this.data.y);
+	}
 });
 
 var Actor = Entity.extend({
@@ -69,11 +81,22 @@ var Actor = Entity.extend({
 	}
 });
 
-var Player = Actor.extend({tiles: [PLAYER]});
+var Player = Actor.extend({
+	tiles: [PLAYER],
+	render: function (viewport, putTile) {
+		putTile(this.tiles[this.frame], this.data.x, this.data.y);
+	}
+});
+
 var Goblin = Actor.extend({tiles: [GOBLIN]});
 
 var Slime = Actor.extend({tiles: [SLIME1, SLIME2], speed: 600});
 
+var Fire = Projectile.extend({
+	tiles: [FIRE_LEFT, FIRE_RIGHT, FIRE_UP, FIRE_DOWN],
+	speed: 50
+});
+
 var entityTypes = [
-	Light, Player, Goblin, Slime
+	Light, Player, Goblin, Slime, Fire
 ];

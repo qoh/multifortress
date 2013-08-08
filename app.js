@@ -34,5 +34,11 @@ app.get('/', function (req, res) {
 
 // Handle socket.io
 io.sockets.on('connection', function (socket) {
-	var client = new Client(game, socket);
+	socket.on('name', function (name) {
+		if (typeof name !== 'string') return;
+		name = name.trim();
+		if (name.length > 15) name = name.substr(0, 15);
+		if (!name.length) return;
+		var client = new Client(game, socket, name);
+	});
 });

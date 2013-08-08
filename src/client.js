@@ -19,6 +19,7 @@ module.exports = CoreClient.extend({
 	},
 	ondeath: function () {
 		setTimeout(this.spawn.bind(this), 2000);
+		this.game.message('☠ ' + this.name);
 	},
 	onkeydown: function (key) {
 		if (this.control) {
@@ -32,6 +33,20 @@ module.exports = CoreClient.extend({
 
 			if (x !== 0 || y !== 0) {
 				this.control.move(x, y, true);
+			}
+
+			var k = [keys.KEY_A, keys.KEY_D, keys.KEY_W, keys.KEY_S];
+			var dir = k.indexOf(key);
+
+			if (dir !== -1) {
+				var dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+				var xy = dirs[dir];
+
+				new entity.Fire(this.game, {
+					x: this.control.data.x + xy[0],
+					y: this.control.data.y + xy[1],
+					direction: dir
+				});
 			}
 		}
 	},

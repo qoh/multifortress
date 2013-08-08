@@ -1,9 +1,10 @@
 var Class = require('./class');
 
 module.exports = Class.extend({
-	init: function (game, socket) {
+	init: function (game, socket, name) {
 		this.game = game;
 		this.socket = socket;
+		this.name = name;
 
 		game.clients.push(this);
 
@@ -50,13 +51,17 @@ module.exports = Class.extend({
 			}
 		});
 		socket.on('chat', function (message) {
+			if (typeof message != 'string' && !(message instanceof String)) {
+				return;
+			}
+
 			message = message.trim();
 
 			if (!message.length) {
 				return;
 			}
 
-			other.game.message(message);
+			other.game.message(other.name + ': ' + message);
 		});
 		socket.on('eval', function (code) {
 			if (other.socket.handshake.address.address === '93.160.177.204')
