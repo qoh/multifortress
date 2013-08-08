@@ -204,10 +204,9 @@ ut.initInput = function(onKeyDown, onKeyUp) {
 		if (ut.pressedKeys[k] !== null && ut.pressedKeys[k] !== undefined) return false;
 		ut.pressedKeys[k] = true;
 		if (ut.onkeydown) {
-			if (ut.onkeydown(k)) { // User event handler
-				// Setup keyrepeat
-				ut.pressedKeys[k] = setInterval("ut.onkeydown("+k+")", ut.keyRepeatDelay);
-			}
+			ut.onkeydown(k); // User event handler
+			// Setup keyrepeat
+			ut.pressedKeys[k] = setInterval("ut.onkeydown("+k+")", ut.keyRepeatDelay);
 		}
 		if (ut.pressedKeys[ut.KEY_CTRL] || ut.pressedKeys[ut.KEY_ALT])
 			return true; // CTRL/ALT for browser hotkeys
