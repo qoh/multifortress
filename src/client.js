@@ -64,6 +64,13 @@ module.exports = CoreClient.extend({
 
 			var spawn = choices[Math.floor(Math.random() * choices.length)];
 
+			if (!spawn) {
+				spawn = [
+					Math.floor(Math.random() * this.game.world.w),
+					Math.floor(Math.random() * this.game.world.h)
+				];
+			}
+
 			this.player = new entity.Player(this.game, {x: spawn[0], y: spawn[1]}, this);
 			this.controlEntity(this.player);
 		}

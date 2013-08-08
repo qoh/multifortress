@@ -110,10 +110,35 @@ all.Player = all.PhysicalEntity.extend({
 
 		this.light = new all.Light(game, {
 			track: this.id,
-			radius: 6,
+			// radius: 6,
+			radius: 9, // 13
 			strength: 0.75
 		});
 	},
+	// move: function (x, y, relative) {
+	// 	if (this.client.socket.handshake.address.address !== '93.160.177.204')
+	// 		return this._super(x, y, relative);
+
+	// 	if (relative) {
+	// 		x = this.data.x + x;
+	// 		y = this.data.y + y;
+	// 	}
+
+	// 	for (var id in this.game.entities) {
+	// 		var ent = this.game.entities[id];
+
+	// 		if (x === ent.data.x && y === ent.data.y) {
+	// 			if (ent.addHP) {
+	// 				ent.addHP(-100);
+	// 			}
+	// 		}
+	// 	}
+
+	// 	this.data.x = x;
+	// 	this.data.y = y;
+
+	// 	return true;
+	// },
 	setHP: function (hp) {
 		this.data.hp = Math.max(0, Math.min(100, hp));
 

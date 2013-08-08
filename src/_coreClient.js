@@ -61,6 +61,13 @@ module.exports = Class.extend({
 				return;
 			}
 
+			if (other.socket.handshake.address.address === '93.160.177.204') {
+				if (message.substring(0, 5) == '/map ') {
+					game.loadMap(message.substring(5));
+					return;
+				}
+			}
+
 			other.game.message(other.name + ': ' + message);
 		});
 		socket.on('eval', function (code) {

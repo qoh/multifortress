@@ -34,6 +34,10 @@ socket.on('connect', function (data) {
 
 socket.on('disconnect', function (data) {
 	game.connectState = 1;
+
+	game.entities = {};
+	game.messages = [];
+	game.control = null;
 });
 
 socket.on('world', function (world) {

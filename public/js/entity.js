@@ -7,6 +7,37 @@ var Entity = Class.extend({
 
 var Light = Entity.extend({
 	isLight: true,
+	init: function (data) {
+		this._super(data);
+
+		this.maskBuffer = new Array(game.viewport.h);
+		this.maskOrigin = {x: 0, y: 0};
+
+		for (var j = 0; j < game.viewport.h; ++j) {
+			this.maskBuffer[j] = new Array(game.viewport.w);
+		}
+	},
+	update: function () {
+		for (var j = 0; j < game.viewport.h; ++j) {
+			for (var i = 0; i < game.viewport.w; ++i) {
+				this.maskBuffer[j][i] = false;
+			}
+		}
+
+		var pos = this.getPosition();
+
+		var x = pos.x;
+		var y = pos.y;
+
+		this.maskOrigin.x = x - game.viewport.cx;
+		this.maskOrigin.y = y - game.viewport.cy;
+
+		var step = Math.PI * 2.0 / 1080;
+
+		for (var a = 0; a < Math.PI * 2; a += step) {
+			shootRay(x, y, a, this.maskBuffer, this.maskOrigin);
+		}
+	},
 	getPosition: function () {
 		if (this.data.track) {
 			var track = game.entities[this.data.track];
@@ -20,7 +51,16 @@ var Light = Entity.extend({
 
 		return {x: this.data.x, y: this.data.y};
 	},
+	checkLightFOV: function (x, y) {
+		x -= this.maskOrigin.x;
+		y -= this.maskOrigin.y;
+
+		if (x < 0 || y < 0 || x >= game.viewport.w || y >= game.viewport.h)
+			return false;
+		return this.maskBuffer[y][x];
+	},
 	apply: function (out, x, y, time) {
+		if (!this.checkLightFOV(x, y)) return out;
 		if (this.data.rainbows) {
 			var rgb = hsv2rgb((Math.sin(time / 750) + 1) / 2);
 			this.data.color = [rgb.red, rgb.green, rgb.blue];
@@ -85,6 +125,14 @@ var Player = Actor.extend({
 	tiles: [PLAYER],
 	render: function (viewport, putTile) {
 		putTile(this.tiles[this.frame], this.data.x, this.data.y);
+
+		var x = this.data.x + viewport.cx - game.camera[0];
+		var y = this.data.y + viewport.cy - game.camera[1];
+
+		x -= Math.round(this.data.name.length / 2);
+		y -= 1;
+
+		// viewport.putString(this.data.name, x, y);
 	}
 });
 

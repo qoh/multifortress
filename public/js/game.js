@@ -30,6 +30,16 @@ var Game = Class.extend({
 		this.camera = [0, 0];
 		this.messages = [];
 
+		// initFOV(this);
+
+		// this.engine.setMaskFunc(function (x, y) {
+		// 	x -= maskOrigin.x;
+		// 	y -= maskOrigin.y;
+
+		// 	if (x < 0 || y < 0 || x >= game.viewport.w || y >= game.viewport.h) return false;
+		// 	return maskBuffer[y][x];
+		// });
+
 		this.engine.setShaderFunc(this.shadeTile.bind(this));
 		ut.initInput(this.keydown.bind(this), this.keyup.bind(this));
 
@@ -38,6 +48,9 @@ var Game = Class.extend({
 	},
 	load: function (world) {
 		this.world = world;
+		this.entities = {};
+		this.control = [];
+		this.camera = [0, 0];
 		this.engine.setWorldSize(world.w, world.h);
 	},
 	update: function () {
@@ -78,6 +91,8 @@ var Game = Class.extend({
 		if (entity) {
 			this.camera[0] = entity.data.x;
 			this.camera[1] = entity.data.y;
+
+			// updateFOV(entity.data.x, entity.data.y);
 		}
 
 		this.engine.update(this.camera[0], this.camera[1]);
@@ -152,6 +167,16 @@ var Game = Class.extend({
 		shaded.b = Math.min(255, Math.max(0, out.b * out.factor));
 
 		return shaded;
+	},
+	hasEntityAt: function (x, y) {
+		for (var id in this.entities) {
+			var data = this.entities[id].data;
+
+			if (data.x === x && data.y === y)
+				return true;
+		}
+
+		return false;
 	},
 	keydown: function (key) {
 		this.socket.emit('keydown', key);
