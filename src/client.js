@@ -11,7 +11,7 @@ function Client(game, socket, io) {
 	this.keyDown = {};
 	this.boundKeys = {};
 
-	this.bindEvents();
+	this.bindSocketEvents();
 	this.onConnect();
 }
 
