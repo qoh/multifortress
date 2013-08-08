@@ -28,6 +28,10 @@ Client.prototype.onConnect = function () {
 	this.spawn();
 }
 
+Client.prototype.onDeath = function () {
+	setTimeout(this.spawn.bind(this), 2000);
+}
+
 Client.prototype.onDisconnect = function () {
 	if (this.player) {
 		this.player.delete();

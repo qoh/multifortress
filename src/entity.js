@@ -123,12 +123,12 @@ all.Player = all.PhysicalEntity.extend({
 		this.data.hp = Math.max(0, Math.min(100, hp));
 
 		if (this.data.hp <= 0) {
-			for (var i = 0; i < this._controlledBy.length; ++i) {
-				var client = this._controlledBy[i];
+			if (this.client) {
+				this.client.onDeath();
+			}
 
-				setTimeout(function() {
-					client.spawn();
-				}, 2000);
+			if (this.client.player == this) {
+				this.client.player = null;
 			}
 
 			this.delete();
