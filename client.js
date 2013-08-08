@@ -14,7 +14,6 @@ function Client(game, socket, io) {
 
 Client.prototype.spawn = function () {
 	var spawn = this.getSpawnPoint();
-	this.moveDir = {x: 0, y: 0};
 
 	this.player = new entity.Player(this.game, {x: spawn[0], y: spawn[1]});
 	this.player.client = this;
