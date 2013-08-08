@@ -1,4 +1,4 @@
-var Class = require('./classy');
+var Class = require('./class');
 var all = module.exports;
 
 all.Entity = Class.extend({
